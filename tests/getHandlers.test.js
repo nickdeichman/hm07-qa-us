@@ -1,42 +1,63 @@
 // eslint-disable-next-line no-undef
 const config = require('../config');
-// eslint-disable-next-line no-undef
-const entities = require('../entities/entities.js');
-// eslint-disable-next-line no-undef
-const getHandlersFuncs = require('../service/getHandlersFunctions.js');
+const expectedResult = [
+  {
+    name: 'Everything You Need',
+    workingHours: {
+      start: 7,
+      end: 23,
+    },
+  },
+  {
+    name: 'Fresh Food',
+    workingHours: {
+      start: 8,
+      end: 23,
+    },
+  },
+  {
+    name: 'Food City',
+    workingHours: {
+      start: 8,
+      end: 21,
+    },
+  },
+  {
+    name: 'Big World',
+    workingHours: {
+      start: 5,
+      end: 20,
+    },
+  },
+];
 
-test('Get response of a list of warehouses return status code 200', async () => {
-  try {
-    const response = await fetch(`${config.API_URL}/api/v1/warehouses`);
-    const responseStatus = response.status;
-    expect(responseStatus).toBe(200);
-  } catch (error) {
-    console.error(error);
-  }
+test('Get response of a list of warehouses return status code 200 and object array with correct object structure', async () => {
+  const response = await fetch(`${config.API_URL}/api/v1/warehouses`);
+  expect(response.status).toBe(200);
+
+  const actualResult = await response.json();
+  expect(actualResult).toEqual(expectedResult);
 });
 
-test('Get response of a list of warehouses return object array with correct object structure', async () => {
-  const result = [];
-  try {
-    const response = await fetch(`${config.API_URL}/api/v1/warehouses`);
-    const data = await response.json();
-    data.map((warehouse) => {
-      if (
-        Object.keys(warehouse).length <
-        Object.keys(entities.correctWarehouse).length
-      ) {
-        result.push(false);
-        return;
-      }
-      result.push(
-        getHandlersFuncs.validateWarehouseObject(
-          warehouse,
-          entities.correctWarehouse
-        )
-      );
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  expect(result).not.toContain(false);
+test('Check the correctness of response structure', async () => {
+  const response = await fetch(`${config.API_URL}/api/v1/warehouses`);
+  const actualResult = await response.json();
+  
+  expect(Array.isArray(actualResult)).toBe(true);
+  // Check if each object in the array has the correct structure
+  actualResult.forEach((warehouse) => {
+    expect(warehouse).toHaveProperty('name', expect.any(String));
+    expect(warehouse).toHaveProperty('workingHours', expect.any(Object));
+    expect(warehouse.workingHours).toHaveProperty('start', expect.any(Number));
+    expect(warehouse.workingHours).toHaveProperty('end', expect.any(Number));
+  });
+});
+
+test('Check the time of response on GET request less than 1 sec', async () => {
+  const startTime = performance.now();
+  // eslint-disable-next-line no-unused-vars
+  const response = await fetch(`${config.API_URL}/api/v1/warehouses`);
+  const endTime = performance.now();
+  const responseTime = endTime - startTime;
+  expect(responseTime).toBeLessThan(1000); // Response time should be less than 1 second
 });
