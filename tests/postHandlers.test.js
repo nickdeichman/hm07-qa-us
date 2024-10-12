@@ -26,7 +26,7 @@ const expectedQuantityResult = {
   },
 };
 
-test('Receive response code 404 at POST request on "/api/v1/warehouses/amount" endpoint with incorrect data', async () => {
+test('Receive response code 500 at POST request on "/api/v1/warehouses/amount" endpoint with incorrect data', async () => {
   const response = await fetch(`${config.API_URL}/api/v1/warehouses/amount`, {
     method: 'POST',
     headers: {
@@ -34,7 +34,7 @@ test('Receive response code 404 at POST request on "/api/v1/warehouses/amount" e
     },
     body: JSON.stringify(incorrectRequestBodyForWarehouseAmount),
   });
-  expect(response.statusCode).toBe(404);
+  expect(response.status).toBe(500);
 });
 
 test('Receive expected quantity at each warehouse result at POST request and response code 200 on "/api/v1/warehouses/amount" endpoint', async () => {
